@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APK Converter Studio – HTML to APK</title>
+<meta name="description" content="Convert your HTML website or ZIP project into an Android APK in one click.">
+<meta name="theme-color" content="#e6e9ef">
+<style>
+:root{
+  --bg:#e6e9ef; --text:#2d3748; --muted:#718096; --accent:#4f46e5; --accent2:#7c3aed;
+  --sh-d:#c3c8d3; --sh-l:#ffffff; --ok:#16a34a; --err:#dc2626;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#23262d; --text:#e5e7eb; --muted:#9aa3b2; --sh-d:#17191e; --sh-l:#2f333c; --accent:#818cf8; --accent2:#a78bfa}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali",sans-serif;
+  min-height:100vh;padding:max(20px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));
+  display:flex;justify-content:center;
+}
+.wrap{width:100%;max-width:560px}
+header{text-align:center;margin:10px 0 26px}
+.logo{
+  width:76px;height:76px;margin:0 auto 14px;border-radius:24px;display:grid;place-items:center;
+  background:var(--bg);box-shadow:8px 8px 16px var(--sh-d),-8px -8px 16px var(--sh-l);font-size:36px;
+}
+h1{margin:0;font-size:1.65rem;letter-spacing:.2px}
+header p{margin:8px 0 0;color:var(--muted);font-size:.95rem}
+.card{
+  background:var(--bg);border-radius:28px;padding:22px;
+  box-shadow:12px 12px 24px var(--sh-d),-12px -12px 24px var(--sh-l);
+}
+.field{margin-bottom:20px}
+label.t{display:flex;align-items:center;gap:8px;font-weight:600;margin:0 0 10px 4px;font-size:.95rem}
+.num{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+input[type=text]{
+  width:100%;border:0;outline:0;background:var(--bg);color:var(--text);
+  font-size:1rem;padding:15px 18px;border-radius:16px;
+  box-shadow:inset 5px 5px 10px var(--sh-d),inset -5px -5px 10px var(--sh-l);
+}
+input[type=text]::placeholder{color:var(--muted)}
+.drop{
+  position:relative;display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;cursor:pointer;
+  box-shadow:inset 5px 5px 10px var(--sh-d),inset -5px -5px 10px var(--sh-l);transition:.2s;
+}
+.drop.drag{outline:2px dashed var(--accent)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ico{
+  flex:none;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:24px;overflow:hidden;
+  background:var(--bg);box-shadow:4px 4px 8px var(--sh-d),-4px -4px 8px var(--sh-l);
+}
+.ico img{width:100%;height:100%;object-fit:cover}
+.dtxt{min-width:0}
+.dtxt b{display:block;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dtxt span{font-size:.8rem;color:var(--muted)}
+.drop.has b{color:var(--ok)}
+.btn{
+  width:100%;border:0;cursor:pointer;font-size:1.05rem;font-weight:700;color:#fff;padding:16px;border-radius:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  box-shadow:6px 6px 14px var(--sh-d),-6px -6px 14px var(--sh-l);transition:transform .1s,opacity .2s;
+}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.msg{display:none;margin-top:18px;padding:14px 16px;border-radius:16px;font-size:.92rem;line-height:1.45;
+  box-shadow:inset 4px 4px 8px var(--sh-d),inset -4px -4px 8px var(--sh-l)}
+.msg.err{display:block;color:var(--err)}
+.prog{display:none;margin-top:20px}
+.bar{height:14px;border-radius:10px;overflow:hidden;box-shadow:inset 3px 3px 6px var(--sh-d),inset -3px -3px 6px var(--sh-l)}
+.bar i{display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .6s ease}
+.step{margin-top:12px;text-align:center;font-size:.9rem;color:var(--muted)}
+.done{display:none;margin-top:20px;text-align:center}
+.done h2{margin:0 0 6px;font-size:1.2rem;color:var(--ok)}
+.done p{margin:0 0 14px;color:var(--muted);font-size:.88rem}
+.done a.btn{display:block;text-decoration:none}
+.again{margin-top:12px;background:none;border:0;color:var(--accent);font-weight:600;cursor:pointer;font-size:.92rem}
+.note{margin:22px 6px 0;font-size:.78rem;color:var(--muted);text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">📱</div>
+    <h1>APK Converter Studio</h1>
+    <p>Turn your HTML website into an Android APK</p>
+  </header>
+
+  <div class="card" id="card">
+    <div class="field">
+      <label class="t"><span class="num">1</span>App name</label>
+      <input type="text" id="name" maxlength="80" placeholder="e.g. My Awesome App" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label class="t"><span class="num">2</span>Website file (.html or .zip)</label>
+      <div class="drop" id="dropHtml">
+        <input type="file" id="html" accept=".html,.htm,.zip">
+        <div class="ico">🌐</div>
+        <div class="dtxt"><b id="htmlName">Tap to choose file</b><span id="htmlInfo">HTML, HTM or ZIP · max 10 MB</span></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="t"><span class="num">3</span>App icon (PNG / JPEG)</label>
+      <div class="drop" id="dropIcon">
+        <input type="file" id="icon" accept="image/png,image/jpeg">
+        <div class="ico" id="iconPrev">🖼️</div>
+        <div class="dtxt"><b id="iconName">Tap to choose icon</b><span id="iconInfo">Square image recommended · max 6 MB</span></div>
+      </div>
+    </div>
+
+    <button class="btn" id="go">⚡ Build APK</button>
+
+    <div class="msg" id="err"></div>
+
+    <div class="prog" id="prog">
+      <div class="bar"><i id="fill"></i></div>
+      <div class="step" id="step">Starting…</div>
+    </div>
+
+    <div class="done" id="done">
+      <h2>✅ APK is ready!</h2>
+      <p id="doneInfo"></p>
+      <a class="btn" id="dl" href="#" download>⬇️ Download APK</a>
+      <button class="again" id="again">Build another app</button>
+    </div>
+  </div>
+
+  <p class="note">⚠️ Test builds only. Each APK uses a temporary signing key and cannot update an earlier build.<br>Building can take up to two minutes.</p>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var MAXH=10*1024*1024, MAXI=6*1024*1024;
+  var nameEl=$('name'), htmlEl=$('html'), iconEl=$('icon'), go=$('go');
+  var blobUrl=null, timer=null;
+
+  function fmt(b){return b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB'}
+  function showErr(t){var e=$('err');e.textContent=t;e.className='msg err'}
+  function clearErr(){$('err').className='msg';$('err').textContent=''}
+
+  function bindDrop(box,input,onPick){
+    ['dragenter','dragover'].forEach(function(ev){box.addEventListener(ev,function(e){e.preventDefault();box.classList.add('drag')})});
+    ['dragleave','drop'].forEach(function(ev){box.addEventListener(ev,function(e){e.preventDefault();box.classList.remove('drag')})});
+    box.addEventListener('drop',function(e){
+      if(e.dataTransfer.files.length){input.files=e.dataTransfer.files;onPick()}
+    });
+    input.addEventListener('change',onPick);
+  }
+
+  bindDrop($('dropHtml'),htmlEl,function(){
+    var f=htmlEl.files[0], box=$('dropHtml');
+    if(!f){box.classList.remove('has');$('htmlName').textContent='Tap to choose file';return}
+    $('htmlName').textContent=f.name; $('htmlInfo').textContent=fmt(f.size); box.classList.add('has');
+  });
+  bindDrop($('dropIcon'),iconEl,function(){
+    var f=iconEl.files[0], box=$('dropIcon');
+    if(!f){box.classList.remove('has');$('iconName').textContent='Tap to choose icon';$('iconPrev').textContent='🖼️';return}
+    $('iconName').textContent=f.name; $('iconInfo').textContent=fmt(f.size); box.classList.add('has');
+    var img=new Image(); img.alt='';
+    img.src=URL.createObjectURL(f);
+    $('iconPrev').textContent=''; $('iconPrev').appendChild(img);
+  });
+
+  var steps=[
+    [8,'Uploading your files…'],[22,'Preparing project…'],[40,'Packaging assets…'],
+    [58,'Compiling app…'],[74,'Signing test build…'],[88,'Almost there…']
+  ];
+  function startProgress(){
+    $('prog').style.display='block'; var i=0;
+    $('fill').style.width='4%'; $('step').textContent='Starting…';
+    timer=setInterval(function(){
+      if(i<steps.length){$('fill').style.width=steps[i][0]+'%';$('step').textContent=steps[i][1];i++}
+    },7000);
+    setTimeout(function(){if(i===0){$('fill').style.width=steps[0][0]+'%';$('step').textContent=steps[0][1];i=1}},500);
+  }
+  function stopProgress(){clearInterval(timer);timer=null;$('prog').style.display='none'}
+
+  function validate(){
+    var n=nameEl.value.trim();
+    if(!n) return 'Please enter an app name.';
+    var h=htmlEl.files[0], ic=iconEl.files[0];
+    if(!h) return 'Please choose your HTML or ZIP file.';
+    if(!/\.(html?|zip)$/i.test(h.name)) return 'Website file must be .html, .htm or .zip.';
+    if(h.size>MAXH) return 'Website file is too large (max 10 MB).';
+    if(!ic) return 'Please choose an app icon.';
+    if(!/^image\/(png|jpeg)$/.test(ic.type)) return 'Icon must be PNG or JPEG.';
+    if(ic.size>MAXI) return 'Icon is too large (max 6 MB).';
+    return null;
+  }
+
+  go.addEventListener('click',function(){
+    clearErr();
+    var v=validate(); if(v){showErr(v);return}
+    var fd=new FormData();
+    fd.append('app_name',nameEl.value.trim());
+    fd.append('html',htmlEl.files[0]);
+    fd.append('icon',iconEl.files[0]);
+    go.disabled=true; go.textContent='⏳ Building…';
+    startProgress();
+
+    var ctrl=new AbortController();
+    var to=setTimeout(function(){ctrl.abort()},200000);
+    fetch('/build',{method:'POST',body:fd,signal:ctrl.signal}).then(function(r){
+      var ct=r.headers.get('Content-Type')||'';
+      if(r.ok && ct.indexOf('application/vnd.android.package-archive')>-1){
+        var nm=r.headers.get('X-APK-Name')||(nameEl.value.trim()+'.apk');
+        return r.blob().then(function(b){return {blob:b,name:nm}});
+      }
+      return r.json().catch(function(){return {error:'Build failed (HTTP '+r.status+')'}}).then(function(j){throw new Error(j.error||'Build failed')});
+    }).then(function(res){
+      clearTimeout(to); $('fill').style.width='100%';
+      if(blobUrl) URL.revokeObjectURL(blobUrl);
+      blobUrl=URL.createObjectURL(res.blob);
+      var a=$('dl'); a.href=blobUrl; a.download=res.name;
+      $('doneInfo').textContent=res.name+' · '+fmt(res.blob.size);
+      setTimeout(function(){
+        stopProgress(); go.style.display='none'; $('done').style.display='block'; a.click();
+      },500);
+    }).catch(function(e){
+      clearTimeout(to); stopProgress();
+      showErr(e.name==='AbortError'?'The build took too long. Please try again.':(e.message||'Something went wrong.'));
+      go.disabled=false; go.textContent='⚡ Build APK';
+    });
+  });
+
+  $('again').addEventListener('click',function(){
+    $('done').style.display='none'; go.style.display='block'; go.disabled=false; go.textContent='⚡ Build APK';
+    htmlEl.value=''; iconEl.value=''; nameEl.value='';
+    htmlEl.dispatchEvent(new Event('change')); iconEl.dispatchEvent(new Event('change'));
+    $('htmlInfo').textContent='HTML, HTM or ZIP · max 10 MB'; $('iconInfo').textContent='Square image recommended · max 6 MB';
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+})();
+</script>
+</body>
+</html>
